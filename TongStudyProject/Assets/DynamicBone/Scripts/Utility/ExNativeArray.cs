@@ -208,10 +208,10 @@ namespace DynamicBone.Scripts.Utility
             return AddRange(exarray.GetNativeArray(), exarray.Count);
         }
 
-        public DataChunk AddRange(ExSimpleNativeArray<T> exarray)
-        {
-            return AddRange(exarray.GetNativeArray(), exarray.Count);
-        }
+        // public DataChunk AddRange(ExSimpleNativeArray<T> exarray)
+        // {
+        //     return AddRange(exarray.GetNativeArray(), exarray.Count);
+        // }
 
         /// <summary>
         /// 型は異なるが型のサイズは同じ配列を追加する。Vector3->float3など。

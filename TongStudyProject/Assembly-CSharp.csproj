@@ -50,11 +50,9 @@
      <Compile Include="Assets\TransformGUI.cs" />
      <Compile Include="Assets\DynamicBone\Scripts\DynamicBoneProcess.cs" />
      <Compile Include="Assets\DynamicBone\Scripts\Manager\DynamicBoneClothManager.cs" />
-     <Compile Include="Assets\DynamicBone\Scripts\Utility\ExProcessingList.cs" />
      <Compile Include="Assets\DynamicBone\Scripts\Manager\IDynamicBoneManager.cs" />
      <Compile Include="Assets\DynamicBone\Scripts\SerializeData\DynamicBonePresetUtil.cs" />
      <Compile Include="Assets\DynamicBone\Scripts\Manager\DynamicBoneSimulationManager.cs" />
-     <Compile Include="Assets\DynamicBone\Scripts\Utility\ExSimpleNativeArray.cs" />
      <Compile Include="Assets\DynamicBone\Scripts\Utility\ExNativeArray.cs" />
      <Compile Include="Assets\DynamicBone\Scripts\Utility\DataChunk.cs" />
      <Compile Include="Assets\DynamicBone\Scripts\DynamicBone.cs" />

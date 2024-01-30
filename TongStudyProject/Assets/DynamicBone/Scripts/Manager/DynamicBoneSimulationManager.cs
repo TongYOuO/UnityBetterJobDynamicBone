@@ -598,46 +598,7 @@ namespace DynamicBone.Scripts
             }
             
         }
-
-        /// <summary>
-        /// 暂时先放在主线程后续有时间再改成Job,比较难改
-        /// </summary>
-        public void ApplyParticlesToTransformsDirectly()
-        {
-            for (int index = 0; index < m_ParticleInfoArray.Count; index++)
-            {
-                //跳过根节点
-                if (m_ParticleInfoArray[index].m_LocalParentIndex == -1)
-                    continue;
-                
-                var p = m_ParticleInfoArray[index];
-                var p0 = m_ParticleInfoArray[p.m_GlobalParentIndex];
-
-                if (p0.m_ChildCount <= 1)		// do not modify bone orientation if has more then one child
-                {
-                    float3 localPos;
-                    if (p.m_TransformNotNull)
-                    {
-                        localPos = m_ParticleTransformAccessArray[index].localPosition;
-                    }
-                    else
-                    {
-                        localPos = p.m_EndOffset;
-                    }
-                    
-                    float3 v0 = m_ParticleTransformLocalToWorldMatrixArray[p.m_GlobalParentIndex].MultiplyVector(localPos);
-                    float3 v1 = m_ParticlePositionArray[index] - m_ParticlePositionArray[p.m_GlobalParentIndex];
-                    Quaternion rot = Quaternion.FromToRotation(v0, v1);
-                    m_ParticleTransformAccessArray[p.m_GlobalParentIndex].rotation = rot * m_ParticleTransformAccessArray[p.m_GlobalParentIndex].rotation;
-                }
-
-                if (p.m_TransformNotNull)
-                {
-                    m_ParticleTransformAccessArray[index].position = m_ParticlePositionArray[index];
-                }
-            }
-
-        }
+        
         // public JobHandle PrepareApplyParticlesToTransforms(JobHandle mainJob)
         // {
         //     var job = new PrepareApplyParticlesToTransformsJob()

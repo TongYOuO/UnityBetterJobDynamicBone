@@ -11,15 +11,15 @@ namespace DynamicBone.Scripts
         bool isValid = false;
         void OnBeforeLateUpdate()
         {
-            // if (DynamicBoneManager.Time.m_UpdateLocation == DynamicBoneTimeManager.UpdateLocation.BeforeLateUpdate)
+            if (DynamicBoneManager.Time.m_UpdateLocation == DynamicBoneTimeManager.UpdateLocation.BeforeLateUpdate)
                 ClothUpdate();
         }
         
         void OnAfterLateUpdate()
         {
-            // if (DynamicBoneManager.Time.m_UpdateLocation == DynamicBoneTimeManager.UpdateLocation.AfterLateUpdate)
-            //     ClothUpdate();
-   
+            if (DynamicBoneManager.Time.m_UpdateLocation == DynamicBoneTimeManager.UpdateLocation.AfterLateUpdate)
+                ClothUpdate();
+            CompleteMasterJob();
         }
         
         void OnAfterFixedUpdate()
@@ -37,6 +37,9 @@ namespace DynamicBone.Scripts
         {
             if (DynamicBoneManager.m_UpdateMode != DynamicBone.UpdateMode.AnimatePhysics)
             {
+                ClearMasterJob();
+                var simulationManager = DynamicBoneManager.Simulation;
+                _masterJob = simulationManager.PreUpdate(_masterJob);
                 CompleteMasterJob();
             }
         }
@@ -58,14 +61,13 @@ namespace DynamicBone.Scripts
             var teamManager = DynamicBoneManager.Team;
             var simulationManager = DynamicBoneManager.Simulation;
             var colliderManager = DynamicBoneManager.Collider;
-            //TODO:支持队伍的运行时卸载
             // if (tm.ActiveTeamCount == 0)
             // {
             //     return;
             // }
             ClearMasterJob();
             
-            //TODO:支持运行时修改BlendWeight,暂不支持
+            //TODO:支持运行时修改参数,暂不支持
             // masterJob = tm.SetRunTimeTeamsWeight(masterJob);
             
             //TODO:每个Team进行距离禁用+BlendWeight禁用,暂不支持
@@ -111,7 +113,7 @@ namespace DynamicBone.Scripts
             
             if (loop > 0)
             {
-                for (int i = 0; i < 1; ++i)
+                for (int i = 0; i < loop; ++i)
                 {
                     //约束计算
                     _masterJob = simulationManager.UpdateParticles1(_masterJob);
@@ -137,7 +139,7 @@ namespace DynamicBone.Scripts
 
         private void OnAfterRender()
         {
-            CompleteMasterJob();
+
         }
 
         public void Initialize()
@@ -153,13 +155,7 @@ namespace DynamicBone.Scripts
 
         private void OnEarlyUpdate()
         {
-            if (DynamicBoneManager.m_UpdateMode != DynamicBone.UpdateMode.AnimatePhysics)
-            {
-                ClearMasterJob();
-                var simulationManager = DynamicBoneManager.Simulation;
-                _masterJob = simulationManager.PreUpdate(_masterJob);
-           
-            }
+
         }
 
         public bool IsValid()

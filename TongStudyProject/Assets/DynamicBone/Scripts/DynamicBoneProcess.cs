@@ -40,7 +40,7 @@ namespace DynamicBone.Scripts
         public void EndUse()
         {
             return;    
-            //TODO:运行时卸载
+            //TODO:运行时禁用和重新开启
             //DynamicBoneManager.Team.SetEnable(TeamId, false);
         }
 
