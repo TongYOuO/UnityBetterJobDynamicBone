@@ -3,16 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{c55997dc-4469-22ec-1937-0011243d3d1f}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagicaClothV2", "MagicaClothV2.csproj", "{380a42ba-e3c9-124f-764f-bc2982ada4e6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagicaClothV2.Editor", "MagicaClothV2.Editor.csproj", "{d038245e-afe9-7caf-fe61-e446f8c3ba22}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagicaClothV2UPMImporterCollections", "MagicaClothV2UPMImporterCollections.csproj", "{ef9b0b6a-f04b-0328-aefa-bcb27db52b2b}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagicaClothV2UPMImporterBurst", "MagicaClothV2UPMImporterBurst.csproj", "{0119d614-7a01-19f6-13c1-7a48b789f9b7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagicaCloth2UPMImporterShaderGraph", "MagicaCloth2UPMImporterShaderGraph.csproj", "{08eb28f5-c255-eeb1-0cf6-1b6d52cc8d63}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,16 +10,6 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{c55997dc-4469-22ec-1937-0011243d3d1f}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{c55997dc-4469-22ec-1937-0011243d3d1f}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{380a42ba-e3c9-124f-764f-bc2982ada4e6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{380a42ba-e3c9-124f-764f-bc2982ada4e6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{d038245e-afe9-7caf-fe61-e446f8c3ba22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{d038245e-afe9-7caf-fe61-e446f8c3ba22}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ef9b0b6a-f04b-0328-aefa-bcb27db52b2b}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ef9b0b6a-f04b-0328-aefa-bcb27db52b2b}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0119d614-7a01-19f6-13c1-7a48b789f9b7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0119d614-7a01-19f6-13c1-7a48b789f9b7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{08eb28f5-c255-eeb1-0cf6-1b6d52cc8d63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{08eb28f5-c255-eeb1-0cf6-1b6d52cc8d63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,8 +1,9 @@
-﻿using System.Reflection;
+﻿
+#if  UNITY_EDITOR
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-
 namespace DynamicBone.Scripts.SerializeData
 {
     [CustomEditor(typeof(DynamicBone))]
@@ -188,3 +189,4 @@ namespace DynamicBone.Scripts.SerializeData
     }
 
 }
+#endif

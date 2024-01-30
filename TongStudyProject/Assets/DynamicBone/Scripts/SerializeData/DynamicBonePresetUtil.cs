@@ -7,7 +7,7 @@ namespace DynamicBone.Scripts.SerializeData
 {
     public class DynamicBonePresetUtil
     {
-        
+        #if UNITY_EDITOR
         const string prefix = "MC2_Preset";
         const string configName = "MC2 preset folder";
 
@@ -223,6 +223,8 @@ namespace DynamicBone.Scripts.SerializeData
                 EditorUtility.SetDirty(cloth);
             }
         }
+ 
+        #endif
     }
     
 }
