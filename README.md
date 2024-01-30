@@ -1,5 +1,4 @@
 
-![[Video.mp4]]
 自己改了一版DynamicBoneJob的多线程版本，总结吸收了DynamicBone和MagicaCloth的优劣（具体来说是基于最新版的DynamicBone算法支持了Burst和Jobs多线程优化，同时结合了MagicaCloth的这一套PlayerLoopSystem架构在CompleteJob时减少等待时间，配置上也进行了分类和支持模板配置导入导出更清晰！），差不多两周把主体流程跑通了，有一些表现和功能的问题，稳定性还比较差，正在完善当中┭┮﹏┭┮，作为MagicaCloth的低配版本，整体用的MagicaCloth的框架但是采用了DynamicBone的算法
 ![](https://tongpic-1312274798.cos.ap-guangzhou.myqcloud.com/Video.mp4)
 
