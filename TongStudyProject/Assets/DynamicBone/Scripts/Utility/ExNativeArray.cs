@@ -7,11 +7,11 @@ using Unity.Mathematics;
 namespace DynamicBone.Scripts.Utility
 {
     /// <summary>
-    /// 拡張可能なNativeArrayクラス
-    /// 領域が不足すると自動で拡張する
-    /// データはChankDataにより開始インデックスと長さが管理される
-    /// データは削除可能で削除された領域は管理され再利用される
-    /// 領域の管理が必要なためExSimpleNativeArrayに比べてやや重いので注意！
+    /// 可扩展的NativeArray类
+    /// 当区域不足时，它会自动扩展
+    /// 数据由ChankData管理，包括起始索引和长度
+    /// 数据可以删除，删除的区域会被管理并重复使用
+    /// 请注意，由于需要管理区域，所以与ExSimpleNativeArray相比，这个类稍重
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class ExNativeArray<T> : IDisposable where T : unmanaged
@@ -35,13 +35,13 @@ namespace DynamicBone.Scripts.Utility
         public bool IsValid => nativeArray.IsCreated;
 
         /// <summary>
-        /// NativeArrayの領域サイズ
-        /// 実際に利用されているサイズとは異なるので注意！
+        /// NativeArray的区域大小
+        /// 注意，这与实际使用的大小不同！
         /// </summary>
         public int Length => nativeArray.IsCreated ? nativeArray.Length : 0;
 
         /// <summary>
-        /// 実際に利用されているデータ数（最後のチャンクの最後尾＋１）
+        /// 实际使用的数据数量（最后一个块的末尾+1）
         /// </summary>
         public int Count => useCount;
 
@@ -60,13 +60,13 @@ namespace DynamicBone.Scripts.Utility
 
                 if (create)
                 {
-                    // 領域を確保する
+                    // 保留区域
                     AddRange(emptyLength);
                 }
             }
             else if (create)
             {
-                // Native配列のみ０で確保（主にジョブでのエラー対策）
+                // 仅以0创建Native数组（主要用于处理作业中的错误）
                 nativeArray = new NativeArray<T>(0, Allocator.Persistent);
             }
         }
@@ -90,9 +90,9 @@ namespace DynamicBone.Scripts.Utility
         //=========================================================================================
 #if false
         /// <summary>
-        /// 使用配列カウントを設定する
-        /// 有効数を書き換えすべてのデータを１つのチャンクとして使用中とする
-        /// かなり強力な機能なので扱いには注意すること！
+        /// 设置使用数组计数
+        /// 重写有效数量，将所有数据作为一个块使用
+        /// 这是一个非常强大的功能，所以要小心使用！
         /// </summary>
         /// <param name="count"></param>
         public void SetUseCount(int count)
@@ -101,24 +101,23 @@ namespace DynamicBone.Scripts.Utility
             emptyChunks.Clear();
             if (useCount > Length)
             {
-                // 未使用領域を１つの空チャンクとして登録する
+                // 将未使用的区域注册为一个空块
                 var chunk = new DataChunk(useCount, Length - useCount);
                 emptyChunks.Add(chunk);
             }
         }
 #endif
-
-        /// <summary>
-        /// 指定サイズの領域を追加しそのチャンクを返す
+        ///<summary>
+        /// 添加指定大小的区域，并返回该区块
         /// </summary>
-        /// <param name="dataLength"></param>
-        /// <returns></returns>
+        ///<param name="dataLength"></param>
+        ///<returns></returns>
         public DataChunk AddRange(int dataLength)
         {
-            // サイズ0対応
+            // 支持大小为0的区域
             if (dataLength == 0)
             {
-                // 領域だけは0で確保する
+                // 仅为区域分配0
                 if (nativeArray.IsCreated == false)
                     nativeArray = new NativeArray<T>(0, Allocator.Persistent);
 
@@ -129,12 +128,12 @@ namespace DynamicBone.Scripts.Utility
 
             if (chunk.IsValid == false)
             {
-                // 空きを増やす
+                // 增加空闲空间
                 int nowLength = Length;
                 int nextLength = Length + math.max(dataLength, nowLength);
                 if (nowLength == 0)
                 {
-                    // 新規
+                    // 新建
                     if (nativeArray.IsCreated)
                         nativeArray.Dispose();
                     nativeArray = new NativeArray<T>(nextLength, Allocator.Persistent);
@@ -142,20 +141,20 @@ namespace DynamicBone.Scripts.Utility
                 }
                 else
                 {
-                    // 拡張
+                    // 扩展
                     var newNativeArray = new NativeArray<T>(nextLength, Allocator.Persistent);
 
-                    // copy
+                    // 复制
                     NativeArray<T>.Copy(nativeArray, newNativeArray, nowLength);
                     nativeArray.Dispose();
                     nativeArray = newNativeArray;
 
-                    // data chunk
+                    // 数据区块
                     chunk.m_StartIndex = nowLength;
                     chunk.m_DataLength = dataLength;
 
                     int last = nowLength + dataLength;
-                    if (last < nextLength)
+                    if (last< nextLength)
                     {
                         var emptyChunk = new DataChunk(last, nextLength - last);
                         AddEmptyChunk(emptyChunk);
@@ -213,12 +212,12 @@ namespace DynamicBone.Scripts.Utility
         //     return AddRange(exarray.GetNativeArray(), exarray.Count);
         // }
 
-        /// <summary>
-        /// 型は異なるが型のサイズは同じ配列を追加する。Vector3->float3など。
+        ///<summary>
+        /// 添加具有相同大小但不同类型的数组。例如，Vector3 -> float3 等。
         /// </summary>
         /// <typeparam name="U"></typeparam>
-        /// <param name="array"></param>
-        /// <returns></returns>
+        ///<param name="array"></param>
+        ///<returns></returns>
         public unsafe DataChunk AddRange<U>(U[] array) where U : struct
         {
             if (array == null || array.Length == 0)
@@ -238,12 +237,12 @@ namespace DynamicBone.Scripts.Utility
             return chunk;
         }
 
-        /// <summary>
-        /// 型は異なるが型のサイズは同じNativeArrayを追加する。Vector3->float3など。
+        ///<summary>
+        /// 添加具有相同大小但不同类型的 NativeArray。例如，Vector3 -> float3 等。
         /// </summary>
         /// <typeparam name="U"></typeparam>
-        /// <param name="udata"></param>
-        /// <returns></returns>
+        ///<param name="udata"></param>
+        ///<returns></returns>
         public DataChunk AddRange<U>(NativeArray<U> udata) where U : struct
         {
             if (udata.IsCreated == false || udata.Length == 0)
@@ -258,14 +257,14 @@ namespace DynamicBone.Scripts.Utility
             return chunk;
         }
 
-        /// <summary>
-        /// 型もサイズも異なる配列を追加する。int[] -> int3[]など。
-        /// データはそのままメモリコピーされる。例えばint[]からint3[]へ追加すると次のようになる。
+        ///<summary>
+        /// 添加具有不同类型和大小的数组。例如，int[] -> int3[] 等。
+        /// 数据会直接内存复制。例如，从 int[] 添加到 int3[]，结果如下：
         /// int[]{1, 2, 3, 4, 5, 6} => int3[]{{1, 2, 3}, {4, 5, 6}}
         /// </summary>
         /// <typeparam name="U"></typeparam>
-        /// <param name="array"></param>
-        /// <returns></returns>
+        ///<param name="array"></param>
+        ///<returns></returns>
         public unsafe DataChunk AddRangeTypeChange<U>(U[] array) where U : struct
         {
             if (array == null || array.Length == 0)
@@ -287,12 +286,12 @@ namespace DynamicBone.Scripts.Utility
             return chunk;
         }
 
-        /// <summary>
-        /// 型もサイズも異なる配列を部分的にコピーする。Vector4[] -> float3など。
+        ///<summary>
+        /// 部分复制不同类型的数组。例如：Vector4[] -> float3 等。
         /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <param name="array"></param>
-        /// <returns></returns>
+        ///<typeparam name="U"></typeparam>
+        ///<param name="array"></param>
+        ///<returns></returns>
         public unsafe DataChunk AddRangeStride<U>(U[] array) where U : struct
         {
             if (array == null || array.Length == 0)
@@ -321,53 +320,53 @@ namespace DynamicBone.Scripts.Utility
             return chunk;
         }
 
-        /// <summary>
-        /// 指定チャンクのデータ数を拡張し新しいチャンクを返す
-        /// 古いチャンクのデータは新しいチャンクにコピーされる
+        ///<summary>
+        /// 扩展指定块的数据长度并返回新的块
+        /// 旧块的数据将被复制到新的块中
         /// </summary>
-        /// <param name="c"></param>
-        /// <param name="newDataLength"></param>
-        /// <returns></returns>
+        ///<param name="c"></param>
+        ///<param name="newDataLength"></param>
+        ///<returns></returns>
         public DataChunk Expand(DataChunk c, int newDataLength)
         {
-            if (c.IsValid == false)
+            if (!c.IsValid)
                 return c;
             if (newDataLength <= c.m_DataLength)
                 return c;
 
-            // 新しい領域を確保する
+            // 分配新的内存区域
             var nc = AddRange(newDataLength);
 
-            // 古い領域をコピーする
+            // 复制旧区域的数据
             NativeArray<T>.Copy(nativeArray, c.m_StartIndex, nativeArray, nc.m_StartIndex, c.m_DataLength);
 
-            // 古い領域を開放する
+            // 释放旧区域
             Remove(c);
 
             return nc;
         }
 
-        /// <summary>
-        /// 指定チャンクのデータ数を拡張し新しいチャンクを返す
-        /// 古いチャンクのデータは新しいチャンクにコピーされる
+        ///<summary>
+        /// 扩展指定块的数据长度并返回新的块
+        /// 旧块的数据将被复制到新的块中
         /// </summary>
-        /// <param name="c"></param>
-        /// <param name="newDataLength"></param>
-        /// <returns></returns>
+        ///<param name="c"></param>
+        ///<param name="newDataLength"></param>
+        ///<returns></returns>
         public DataChunk ExpandAndFill(DataChunk c, int newDataLength, T fillData = default(T), T clearData = default(T))
         {
-            if (c.IsValid == false)
+            if (!c.IsValid)
                 return c;
             if (newDataLength <= c.m_DataLength)
                 return c;
 
-            // 新しい領域を確保する
+            // 分配新的内存区域
             var nc = AddRange(newDataLength, fillData);
 
-            // 古い領域をコピーする
+            // 复制旧区域的数据
             NativeArray<T>.Copy(nativeArray, c.m_StartIndex, nativeArray, nc.m_StartIndex, c.m_DataLength);
 
-            // 古い領域を開放する
+            // 释放旧区域并填充
             RemoveAndFill(c, clearData);
 
             return nc;
@@ -398,12 +397,12 @@ namespace DynamicBone.Scripts.Utility
             NativeArray<T>.Copy(array.Reinterpret<T>(), nativeArray);
         }
 
-        /// <summary>
-        /// 型もサイズも異なる配列にデータをコピーする。
-        /// int3 -> int[]など
+        ///<summary>
+        /// 将数据复制到不同类型和大小的数组中。
+        /// 例如：int3 -> int[] 等。
         /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <param name="array"></param>
+        ///<typeparam name="U"></typeparam>
+        ///<param name="array"></param>
         public unsafe void CopyTypeChange<U>(U[] array) where U : struct
         {
             int srcSize = UnsafeUtility.SizeOf<T>();
@@ -418,12 +417,12 @@ namespace DynamicBone.Scripts.Utility
             UnsafeUtility.ReleaseGCObject(dst_gcHandle);
         }
 
-        /// <summary>
-        /// 型もサイズも異なる配列にデータを断片的にコピーする。
-        /// float3 -> Vector4[]など。この場合はVector4にはxyzのみ書き込まれる。
+        ///<summary>
+        /// 将数据分段复制到不同类型和大小的数组中。
+        /// 例如：float3 -> Vector4[] 等。这种情况下，只有 Vector4 的 xyz 部分会被写入。
         /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <param name="array"></param>
+        ///<typeparam name="U"></typeparam>
+        ///<param name="array"></param>
         public unsafe void CopyTypeChangeStride<U>(U[] array) where U : struct
         {
             int srcSize = UnsafeUtility.SizeOf<T>();
@@ -440,10 +439,10 @@ namespace DynamicBone.Scripts.Utility
             UnsafeUtility.ReleaseGCObject(dst_gcHandle);
         }
 
-        /// <summary>
-        /// すぐに利用できる空領域のみ追加する
+        ///<summary>
+        /// 仅添加可立即使用的空闲区域。
         /// </summary>
-        /// <param name="dataLength"></param>
+        ///<param name="dataLength"></param>
         public void AddEmpty(int dataLength)
         {
             var chunk = AddRange(dataLength);
@@ -457,7 +456,7 @@ namespace DynamicBone.Scripts.Utility
 
             AddEmptyChunk(chunk);
 
-            // 使用量の再計算
+            // 重新计算使用量
             if ((chunk.m_StartIndex + chunk.m_DataLength) == useCount)
             {
                 useCount = 0;
@@ -472,7 +471,7 @@ namespace DynamicBone.Scripts.Utility
         {
             Remove(chunk);
 
-            // データクリア
+            // 清除数据
             // C#
             //Parallel.For(0, chunk.dataLength, i =>
             //{
@@ -557,20 +556,20 @@ namespace DynamicBone.Scripts.Utility
         //    return ref span[index];
         //}
 
-        /// <summary>
-        /// Jobで利用する場合はこの関数でNativeArrayに変換して受け渡す
+        ///<summary>
+        /// 如果在Job中使用，请使用此函数将其转换为NativeArray并传递
         /// </summary>
-        /// <returns></returns>
+        ///<returns></returns>
         public NativeArray<T> GetNativeArray()
         {
             return nativeArray;
         }
 
-        /// <summary>
-        /// Jobで利用する場合はこの関数でNativeArrayに変換して受け渡す(型変更あり)
+        ///<summary>
+        /// 如果在Job中使用，请使用此函数将其转换为NativeArray并传递（带类型转换）
         /// </summary>
         /// <typeparam name="U"></typeparam>
-        /// <returns></returns>
+        ///<returns></returns>
         public NativeArray<U> GetNativeArray<U>() where U : struct
         {
             return nativeArray.Reinterpret<U>();
@@ -613,38 +612,38 @@ namespace DynamicBone.Scripts.Utility
             if (chunk.IsValid == false)
                 return;
 
-            // 後ろに連結できる場所を探す
-            for (int i = 0; i < emptyChunks.Count; i++)
+            // 寻找可以连接到后面的位置
+            for (int i = 0; i< emptyChunks.Count; i++)
             {
                 var c = emptyChunks[i];
                 if ((c.m_StartIndex + c.m_DataLength) == chunk.m_StartIndex)
                 {
-                    // ここに連結する
+                    // 在这里连接
                     c.m_DataLength += chunk.m_DataLength;
                     chunk = c;
 
-                    // cを削除する
+                    // 删除c
                     emptyChunks.RemoveAtSwapBack(i);
                     break;
                 }
             }
 
-            // 前に連結できる場所を探す
-            for (int i = 0; i < emptyChunks.Count; i++)
+            // 寻找可以连接到前面的位置
+            for (int i = 0; i< emptyChunks.Count; i++)
             {
                 var c = emptyChunks[i];
                 if (c.m_StartIndex == (chunk.m_StartIndex + chunk.m_DataLength))
                 {
-                    // ここに連結する
+                    // 在这里连接
                     chunk.m_DataLength += c.m_DataLength;
 
-                    // cを削除する
+                    // 删除c
                     emptyChunks.RemoveAtSwapBack(i);
                     break;
                 }
             }
 
-            // chunkを追加する
+            // 添加chunk
             emptyChunks.Add(chunk);
         }
 

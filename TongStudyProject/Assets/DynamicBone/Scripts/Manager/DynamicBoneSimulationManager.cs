@@ -75,7 +75,7 @@ namespace DynamicBone.Scripts
 
         public void Initialize()
         {
-            const int capacity = 8; // 1024?
+            const int capacity = 8; 
             m_ParticleTreeDataArray = new ExNativeArray<ParticleTreeInfo>(capacity);
             m_ParticleInfoArray = new ExNativeArray<ParticleInfo>(capacity);
             m_ParticleTransformAccessArray = new TransformAccessArray(capacity);

@@ -17,10 +17,10 @@ namespace DynamicBone.Scripts.SerializeData
             bool load = false;
             using (var horizontalScope = new GUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField("Parameters", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("参数", EditorStyles.boldLabel);
 
                 GUI.backgroundColor = Color.green;
-                if (EditorGUILayout.DropdownButton(new GUIContent("Preset"), FocusType.Keyboard, GUILayout.Width(70), GUILayout.Height(16)))
+                if (EditorGUILayout.DropdownButton(new GUIContent("预设"), FocusType.Keyboard, GUILayout.Width(70), GUILayout.Height(16)))
                 {
                     CreatePresetPopupMenu(cloth, sdata);
                     GUI.backgroundColor = Color.white;
@@ -28,13 +28,13 @@ namespace DynamicBone.Scripts.SerializeData
                 }
                 GUI.backgroundColor = Color.white;
 
-                if (GUILayout.Button("Save", GUILayout.Width(40), GUILayout.Height(16)))
+                if (GUILayout.Button("保存", GUILayout.Width(40), GUILayout.Height(16)))
                 {
                     //SavePreset(sdata);
                     //GUIUtility.ExitGUI();
                     save = true;
                 }
-                if (GUILayout.Button("Load", GUILayout.Width(40), GUILayout.Height(16)))
+                if (GUILayout.Button("加载", GUILayout.Width(40), GUILayout.Height(16)))
                 {
                     //LoadPreset(cloth, sdata);
                     //GUIUtility.ExitGUI();
@@ -77,7 +77,7 @@ namespace DynamicBone.Scripts.SerializeData
             {
                 var filePath = AssetDatabase.GUIDToAssetPath(guid);
 
-                // json確認
+                // json确认
                 if (filePath.EndsWith(".json") == false)
                     continue;
 
@@ -89,11 +89,11 @@ namespace DynamicBone.Scripts.SerializeData
                     var fname = Path.GetFileNameWithoutExtension(filePath);
                     fname = fname.Replace(prefix, "");
                     if (fname.StartsWith("_"))
-                        fname = fname.Remove(0, 1); // 頭の_は削除する
+                        fname = fname.Remove(0, 1); // 头的_是删除的
                     info.presetName = fname;
                     info.text = text;
 
-                    // ディレクトリごとに記録する
+                    // 按目录记录
                     var dirName = Path.GetDirectoryName(filePath);
                     if (dict.ContainsKey(dirName) == false)
                     {
@@ -103,8 +103,8 @@ namespace DynamicBone.Scripts.SerializeData
                 }
             }
 
-            // ポップアップメニューの作成
-            // ディレクトリごとにセパレータで分けて表示する
+            // 创建弹出菜单
+            // 按目录分隔显示
             var menu = new GenericMenu();
             int line = 0;
             foreach (var kv in dict)
@@ -120,12 +120,12 @@ namespace DynamicBone.Scripts.SerializeData
                     var presetPath = info.presetPath;
                     menu.AddItem(new GUIContent(presetName), false, () =>
                     {
-                        // load
-                        Debug.Log("Load preset file:" + presetPath);
+                        // 加载
+                        Debug.Log("加载预设文件:" + presetPath);
                         if (sdata.ImportJson(textAsset.text))
-                            Debug.Log("Completed.");
+                            Debug.Log("完成。");
                         else
-                            Debug.LogError("Preset load error!");
+                            Debug.LogError("预设加载错误！");
 
                         LoadPresetFinish(cloth);
                     });
@@ -135,91 +135,91 @@ namespace DynamicBone.Scripts.SerializeData
             menu.ShowAsContext();
         }
 
-        /// <summary>
-        /// プリセットファイル保存
+        ///<summary>
+        /// 保存预设文件
         /// </summary>
-        /// <param name="clothParam"></param>
+        ///<param name="clothParam"></param>
         private static void SavePreset(DynamicBoneSerializeData sdata)
         {
-            // フォルダを読み込み
+            // 读取文件夹
             string folder = EditorUserSettings.GetConfigValue(configName);
 
-            // 接頭語
+            // 前缀
             string presetTypeName = GetComponentTypeName(sdata);
 
-            // 保存ダイアログ
+            // 保存对话框
             string path = EditorUtility.SaveFilePanelInProject(
-                "Save Preset",
-                $"{presetTypeName}_(name)",
+                "保存预设",
+                $"{presetTypeName}_(名称)",
                 "json",
-                "Enter a name for the preset json.",
+                "输入预设json的名称。",
                 folder
                 );
             if (string.IsNullOrEmpty(path))
                 return;
 
-            // フォルダを記録
+            // 记录文件夹
             folder = Path.GetDirectoryName(path);
             EditorUserSettings.SetConfigValue(configName, folder);
 
-            Debug.Log("Save preset file:" + path);
+            Debug.Log("保存预设文件:" + path);
 
-            // export json
+            // 导出json
             string json = sdata.ExportJson();
 
-            // save
+            // 保存
             File.WriteAllText(path, json);
 
             AssetDatabase.Refresh();
 
-            Debug.Log("Completed.");
+            Debug.Log("完成。");
         }
 
-        /// <summary>
-        /// プリセットファイル読み込み
+        ///<summary>
+        /// 加载预设文件
         /// </summary>
-        /// <param name="clothParam"></param>
+        ///<param name="clothParam"></param>
         private static void LoadPreset(DynamicBone cloth, DynamicBoneSerializeData sdata)
         {
-            // フォルダを読み込み
+            // 读取文件夹
             string folder = EditorUserSettings.GetConfigValue(configName);
 
-            // 読み込みダイアログ
-            string path = EditorUtility.OpenFilePanel("Load Preset", folder, "json");
+            // 加载对话框
+            string path = EditorUtility.OpenFilePanel("加载预设", folder, "json");
             if (string.IsNullOrEmpty(path))
                 return;
 
-            // フォルダを記録
+            // 记录文件夹
             folder = Path.GetDirectoryName(path);
             EditorUserSettings.SetConfigValue(configName, folder);
 
-            // import json
-            Debug.Log("Load preset file:" + path);
+            // 导入json
+            Debug.Log("加载预设文件:" + path);
             string json = File.ReadAllText(path);
 
-            // load
+            // 加载
             if (sdata.ImportJson(json))
-                Debug.Log("Completed.");
+                Debug.Log("完成。");
             else
-                Debug.LogError("Preset load error!");
+                Debug.LogError("预设加载错误！");
 
             LoadPresetFinish(cloth);
         }
 
-        /// <summary>
-        /// プリセットファイル読み込み後処理
+        ///<summary>
+        /// 预设文件加载后处理
         /// </summary>
-        /// <param name="cloth"></param>
+        ///<param name="cloth"></param>
         private static void LoadPresetFinish(DynamicBone cloth)
         {
             if (EditorApplication.isPlaying)
             {
-                // // パラメータ更新通知
+                // // 参数更新通知
                 // cloth.SetParameterChange();
             }
             else
             {
-                // シリアライズ変更通知
+                // 序列化更改通知
                 EditorUtility.SetDirty(cloth);
             }
         }
