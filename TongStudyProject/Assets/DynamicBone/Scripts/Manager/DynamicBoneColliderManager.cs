@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DynamicBone.Scripts.Collider;
 using DynamicBone.Scripts.Utility;
 using Unity.Burst;
 using Unity.Collections;
@@ -7,15 +8,28 @@ using UnityEngine.Jobs;
 
 namespace DynamicBone.Scripts
 {
+    /// <summary>
+    /// 重构Collider模块,分离逻辑和参数,挂载的Collider只是用来配置,而真正的逻辑处理在ColliderManager中
+    /// </summary>
     public class DynamicBoneColliderManager: IDynamicBoneManager, IDynamicBoneValid
     {
         // private TransformAccessArray _colliderTransformAccessArray;
         // private ExNativeArray<ColliderInfo> _colliderInfoList;
         // private List<DynamicBoneColliderBase> _colliderList;
         public bool isValid;
+
+        public enum ColliderType
+        {
+            
+        }
+        
         public struct ColliderInfo
         {
+            public int m_TeamIndex;
             public int m_Index;
+
+            public ColliderType ColliderType;
+            
             public bool m_IsGlobal;
             public DynamicBoneColliderBase.Bound m_Bound;
             public float m_Height;
@@ -26,7 +40,10 @@ namespace DynamicBone.Scripts
             public float3 m_Position;
             public quaternion m_Rotation;
         }
-        //
+        
+        public ExNativeArray<ColliderInfo> ColliderInfoNativeArrayList;
+        
+        //TODO:LateUpdate时进行数据的Prepare
         // [BurstCompile]
         // private struct ColliderSetupJob : IJobParallelForTransform
         // {
@@ -42,45 +59,48 @@ namespace DynamicBone.Scripts
         //     }
         // }
         
+        //TODO:在算完一部分约束时进行Collide处理
+        
+        
         /// <summary>
-        /// 将目标骨骼添加到结构中
+        /// 将每个Team关联的Collider添加到NativeArray的结构中
         /// </summary>
         /// <param name="target"></param>
-        // public void AddCollider(DynamicBoneColliderBase target)
-        // {
-        //     int index = _colliderList.IndexOf(target);
-        //
-        //     if (index != -1) return; //防止重复添加
-        //
-        //     _colliderList.Add(target);
-        //
-        //     int colliderIndex = _colliderInfoList.Length;
-        //     target.ColliderInfo.m_Index = colliderIndex;
-        //
-        //     _colliderInfoList.Add(target.ColliderInfo);
-        //     _colliderTransformAccessArray.Add(target.transform);
-        //     
-        // }
+        public DataChunk AddColliders(List<DynamicBoneColliderBase> colliderList)
+        {
+            ColliderInfo[] colliderInfos = new ColliderInfo[colliderList.Count];
+            
+            for (int i = 0; i < colliderList.Count; i++)
+            {
+                colliderInfos[i] = colliderList[i].ColliderInfo;
+            }
+
+            return ColliderInfoNativeArrayList.AddRange(colliderInfos);
+        }
+        
         public void Dispose()
         {
             // _colliderInfoList.Dispose();
-            // _colliderTransformAccessArray.Dispose();
+            ColliderInfoNativeArrayList.Dispose();
             // _colliderList.Clear();
-            // isValid = false;
+            isValid = false;
         }
 
         public void Initialize()
         {
-            // const int capacity = 32;
-            // _colliderTransformAccessArray = new TransformAccessArray(capacity);
-            // _colliderInfoList = new ExNativeArray<ColliderInfo>(capacity);
-            // _colliderList = new List<DynamicBoneColliderBase>(capacity);
-            // isValid = true;
+            const int capacity = 32;
+            ColliderInfoNativeArrayList = new ExNativeArray<ColliderInfo>(capacity);
+            isValid = true;
         }
 
         public bool IsValid()
         {
             return isValid;
+        }
+
+        public void RemoveColliders(DataChunk mColliderInfoChunk)
+        {
+            ColliderInfoNativeArrayList.RemoveAndFill(mColliderInfoChunk);
         }
     }
 }

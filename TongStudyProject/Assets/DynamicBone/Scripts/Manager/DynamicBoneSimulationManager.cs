@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DynamicBone.Scripts.Collider;
 using DynamicBone.Scripts.SerializeData;
 using DynamicBone.Scripts.Utility;
 using Unity.Burst;
@@ -470,8 +471,8 @@ namespace DynamicBone.Scripts
                         }
                     }
 
-                    // //碰撞约束
-                    // // collide
+                    //碰撞约束,打算拆到ColliderMgr当中去
+                    // collide
                     // if (m_EffectiveColliders != null)
                     // {
                     //     float particleRadius = p.m_Radius * m_ObjectScale;

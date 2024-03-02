@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace DynamicBone.Scripts
+namespace DynamicBone.Scripts.Collider
 {
     [AddComponentMenu("Dynamic Bone/Dynamic Bone Collider")]
     public class DynamicBoneCollider : DynamicBoneColliderBase

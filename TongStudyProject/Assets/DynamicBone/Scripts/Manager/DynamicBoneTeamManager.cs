@@ -44,11 +44,9 @@ namespace DynamicBone.Scripts
             public float3 m_ObjectPrevPosition;
 
             //每个Team关联的所有的碰撞器
-            //TODO:用ptr减少重复的存取
             public DataChunk m_ColliderInfoChunk;
             
             public DynamicBone.FreezeAxis m_FreezeAxis;
-
         }
         
         public ref TeamData GetTeamDataRef(int teamId)
@@ -59,7 +57,7 @@ namespace DynamicBone.Scripts
         internal DataChunk AddTeam(DynamicBoneProcess cprocess)
         {
             var transform = cprocess.cloth.transform;
-
+            
             var team = new TeamData()
             {
                 m_ObjectScale = Mathf.Abs(transform.lossyScale.x),
@@ -71,6 +69,7 @@ namespace DynamicBone.Scripts
                 m_FreezeAxis = cprocess.cloth.SerializeData.m_FreezeAxis,
                 m_Force = cprocess.cloth.SerializeData.m_Force,
                 m_UpdateMode = cprocess.cloth.SerializeData.m_UpdateMode,
+                m_ColliderInfoChunk = DynamicBoneManager.Collider.AddColliders(cprocess.cloth.SerializeData.m_Colliders)
             };
             
             var dataChunk = m_TeamDataArray.Add(team);
@@ -137,6 +136,11 @@ namespace DynamicBone.Scripts
         
         public void RemoveTeam(DataChunk dataChunk)
         {
+            //清理每个Team关联的Collider信息
+            for (int i = dataChunk.m_StartIndex; i < dataChunk.m_DataLength; i++)
+            {
+                DynamicBoneManager.Collider.RemoveColliders(m_TeamDataArray[i].m_ColliderInfoChunk);
+            }
             m_TeamDataArray.RemoveAndFill(dataChunk);
         }
         

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DynamicBone.Scripts.Collider;
 using Unity.Mathematics;
 using UnityEngine;
 namespace DynamicBone.Scripts.SerializeData

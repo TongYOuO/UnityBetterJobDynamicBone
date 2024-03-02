@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace DynamicBone.Scripts
+namespace DynamicBone.Scripts.Collider
 {
     public class DynamicBoneColliderBase : MonoBehaviour
     {

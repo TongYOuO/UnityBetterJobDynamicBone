@@ -46,16 +46,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\DynamicBone\Scripts\Manager\DynamicBoneTimeManager.cs" />
-    <Compile Include="Assets\DynamicBone\Scripts\DynamicBoneColliderBase.cs" />
     <Compile Include="Assets\DynamicBone\Scripts\SerializeData\DynamicBonePresetUtil.cs" />
-    <Compile Include="Assets\DynamicBone\Scripts\DynamicBonePlaneCollider.cs" />
     <Compile Include="Assets\DynamicBone\Scripts\Utility\ExNativeArray.cs" />
     <Compile Include="Assets\DynamicBone\Scripts\Manager\IDynamicBoneManager.cs" />
     <Compile Include="Assets\TransformGUI.cs" />
     <Compile Include="Assets\DynamicBone\Scripts\DynamicBoneProcess.cs" />
     <Compile Include="Assets\DynamicBone\Scripts\Manager\DynamicBoneSimulationManager.cs" />
+    <Compile Include="Assets\DynamicBone\Scripts\Collider\DynamicBoneColliderBase.cs" />
+    <Compile Include="Assets\DynamicBone\Scripts\Collider\DynamicBoneCollider.cs" />
+    <Compile Include="Assets\DynamicBone\Scripts\Collider\DynamicBonePlaneCollider.cs" />
     <Compile Include="Assets\DynamicBone\Scripts\Manager\DynamicBoneColliderManager.cs" />
-    <Compile Include="Assets\DynamicBone\Scripts\DynamicBoneCollider.cs" />
     <Compile Include="Assets\DynamicBone\Scripts\DynamicBone.cs" />
     <Compile Include="Assets\DynamicBone\Scripts\Manager\IDynamicBoneValid.cs" />
     <Compile Include="Assets\DynamicBone\Scripts\Manager\DynamicBoneClothManager.cs" />

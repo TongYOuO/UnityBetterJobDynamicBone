@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using DynamicBone.Scripts.Collider;
 using DynamicBone.Scripts.SerializeData;
 using UnityEngine;
 using UnityEngine.Serialization;
