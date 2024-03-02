@@ -15,20 +15,27 @@ namespace DynamicBone.Scripts
         //每个骨骼树特有属性
         public struct ParticleTreeInfo
         {
-            public float3 m_LocalGravity;
-            public float3 m_ForceAfterGravity;
             public int m_TeamIndex;
-            public bool m_IsValid;
             public int GlobalParticleStartIndex;
             public int ParticleCnt;
+            
+            public float3 m_LocalGravity;
+            public float3 m_ForceAfterGravity;
+    
+            public bool m_IsValid;
         }
         
         //每个骨骼特有的属性
         public struct ParticleInfo
         {
+            //用来偏移取父骨骼的偏移量信息
             public int m_Index;
+            public int m_TeamIndex;
+            public int m_ParticleTreeIndex;
             public int m_GlobalParentIndex;
             public int m_LocalParentIndex;
+            
+            //配置信息
             public float m_Damping ;
             public float m_Elasticity;
             public float m_Stiffness ;
@@ -38,6 +45,12 @@ namespace DynamicBone.Scripts
             public float m_BoneLength ;
             public bool m_IsCollide ;
             
+            //原本的Transform相关信息,额外存一份的目的是可以通过子Particle在Job中读取父Particle的相关数据
+            public float3 m_TransformPosition;
+            public float3 m_TransformLocalPosition;
+            public Quaternion m_TransformRotation;
+            public Matrix4x4 m_TransformLocalToWorldMatrix;
+            
             public int m_ChildCount;
             public bool m_TransformNotNull;
             
@@ -45,23 +58,19 @@ namespace DynamicBone.Scripts
             public float3 m_EndOffset;
             public float3 m_InitLocalPosition;
             public Quaternion m_InitLocalRotation ;
-            
-            public int m_TeamIndex;
-            public int m_ParticleTreeIndex;
         }
         
+        //预留,暂时未用到
         bool _isValid = false;
-        
-        //TODO:尽量减少模板的类型,把里面的变量全部展开抽出来,多用一些通用的类型,一方面减少泛型模板的生成减少IL2CPP代码量,一方面可以有利于重用DataChunk,还可以有效的防止Job分组越界,不过这样写起来就只能把多个Array拼成一个目标数据结构来用,就比较难读，有空再改了
 
         public ExNativeArray<ParticleInfo> m_ParticleInfoArray;
         //约束计算用的临时Position
-        //先抽这几个出来m_ParticleTransformPosition、m_ParticleTransformLocalToWorldMatrixArray、m_ParticleTransformLocalPositionArray、m_ParticleTransformRotationArray
+        //抽出来的这几个后面应合并到ParticleInfo当中去,减少占用,但是还是需要单独来存,不能直接读取Transform,因为只能读取TransformAccess,需求是需要读取Parent中的Transform相关的信息
         public ExNativeArray<float3> m_ParticlePositionArray;
-        public ExNativeArray<float3> m_ParticleTransformPositionArray;
-        public ExNativeArray<float3> m_ParticleTransformLocalPositionArray;
-        public ExNativeArray<Quaternion> m_ParticleTransformRotationArray;
-        public ExNativeArray<Matrix4x4> m_ParticleTransformLocalToWorldMatrixArray;
+        // public ExNativeArray<float3> m_ParticleTransformPositionArray;
+        // public ExNativeArray<float3> m_ParticleTransformLocalPositionArray;
+        // public ExNativeArray<Quaternion> m_ParticleTransformRotationArray;
+        // public ExNativeArray<Matrix4x4> m_ParticleTransformLocalToWorldMatrixArray;
         public TransformAccessArray m_ParticleTransformAccessArray;
         
         public ExNativeArray<ParticleTreeInfo> m_ParticleTreeDataArray;
@@ -75,16 +84,16 @@ namespace DynamicBone.Scripts
 
         public void Initialize()
         {
-            const int capacity = 8; 
+            const int capacity = 8;
             m_ParticleTreeDataArray = new ExNativeArray<ParticleTreeInfo>(capacity);
             m_ParticleInfoArray = new ExNativeArray<ParticleInfo>(capacity);
             m_ParticleTransformAccessArray = new TransformAccessArray(capacity);
             m_ParticleTreeTransformAccessArray = new TransformAccessArray(capacity);
             m_ParticlePositionArray = new ExNativeArray<float3>(capacity);
-            m_ParticleTransformPositionArray = new ExNativeArray<float3>(capacity);
-            m_ParticleTransformLocalPositionArray = new ExNativeArray<float3>(capacity);
-            m_ParticleTransformRotationArray = new ExNativeArray<Quaternion>(capacity);
-            m_ParticleTransformLocalToWorldMatrixArray = new ExNativeArray<Matrix4x4>(capacity);
+            // m_ParticleTransformPositionArray = new ExNativeArray<float3>(capacity);
+            // m_ParticleTransformLocalPositionArray = new ExNativeArray<float3>(capacity);
+            // m_ParticleTransformRotationArray = new ExNativeArray<Quaternion>(capacity);
+            // m_ParticleTransformLocalToWorldMatrixArray = new ExNativeArray<Matrix4x4>(capacity);
         }
 
         public void Dispose()
@@ -94,10 +103,10 @@ namespace DynamicBone.Scripts
             m_ParticleTransformAccessArray.Dispose();
             m_ParticleTreeTransformAccessArray.Dispose();
             m_ParticlePositionArray?.Dispose();
-            m_ParticleTransformPositionArray?.Dispose();
-            m_ParticleTransformLocalPositionArray?.Dispose();
-            m_ParticleTransformRotationArray?.Dispose();
-            m_ParticleTransformLocalToWorldMatrixArray?.Dispose();
+            // m_ParticleTransformPositionArray?.Dispose();
+            // m_ParticleTransformLocalPositionArray?.Dispose();
+            // m_ParticleTransformRotationArray?.Dispose();
+            // m_ParticleTransformLocalToWorldMatrixArray?.Dispose();
             
         }
         
@@ -157,10 +166,10 @@ namespace DynamicBone.Scripts
             var job = new PrepareParticleJob()
             {
                 m_ParticleInfos = m_ParticleInfoArray.GetNativeArray(),
-                m_ParticleTransformPositionArray = m_ParticleTransformPositionArray.GetNativeArray(),
-                m_ParticleTransformRotationArray = m_ParticleTransformRotationArray.GetNativeArray(),
-                m_ParticleTransformLocalPositionArray = m_ParticleTransformLocalPositionArray.GetNativeArray(),
-                m_ParticleTransformLocalToWorldMatrixArray = m_ParticleTransformLocalToWorldMatrixArray.GetNativeArray(),
+                // m_ParticleTransformPositionArray = m_ParticleTransformPositionArray.GetNativeArray(),
+                // m_ParticleTransformRotationArray = m_ParticleTransformRotationArray.GetNativeArray(),
+                // m_ParticleTransformLocalPositionArray = m_ParticleTransformLocalPositionArray.GetNativeArray(),
+                // m_ParticleTransformLocalToWorldMatrixArray = m_ParticleTransformLocalToWorldMatrixArray.GetNativeArray(),
             };
             var jobHandle = job.ScheduleReadOnly(m_ParticleTransformAccessArray,8);
             return jobHandle;
@@ -170,24 +179,24 @@ namespace DynamicBone.Scripts
         struct PrepareParticleJob : IJobParallelForTransform
         {
             public NativeArray<ParticleInfo> m_ParticleInfos;
-            [WriteOnly]
-            public NativeArray<float3> m_ParticleTransformPositionArray;
-            [WriteOnly]
-            public NativeArray<float3> m_ParticleTransformLocalPositionArray;
-            [WriteOnly]
-            public NativeArray<Quaternion> m_ParticleTransformRotationArray;
-            [WriteOnly]
-            public NativeArray<Matrix4x4> m_ParticleTransformLocalToWorldMatrixArray;
+            // [WriteOnly]
+            // public NativeArray<float3> m_ParticleTransformPositionArray;
+            // [WriteOnly]
+            // public NativeArray<float3> m_ParticleTransformLocalPositionArray;
+            // [WriteOnly]
+            // public NativeArray<Quaternion> m_ParticleTransformRotationArray;
+            // [WriteOnly]
+            // public NativeArray<Matrix4x4> m_ParticleTransformLocalToWorldMatrixArray;
             public void Execute(int index, TransformAccess transform)
             {
                 ParticleInfo p = m_ParticleInfos[index];
                 
                 if (p.m_TransformNotNull)
                 {
-                    m_ParticleTransformPositionArray[index] = transform.position;
-                    m_ParticleTransformRotationArray[index] = transform.rotation;
-                    m_ParticleTransformLocalPositionArray[index] = transform.localPosition;
-                    m_ParticleTransformLocalToWorldMatrixArray[index] = transform.localToWorldMatrix;
+                    p.m_TransformPosition = transform.position;
+                    p.m_TransformRotation = transform.rotation;
+                    p.m_TransformLocalPosition = transform.localPosition;
+                    p.m_TransformLocalToWorldMatrix = transform.localToWorldMatrix;
                 }
                 
                 m_ParticleInfos[index] = p;
@@ -202,14 +211,14 @@ namespace DynamicBone.Scripts
                 m_ParticleTreeInfos = m_ParticleTreeDataArray.GetNativeArray(),
                 m_ParticleInfos = m_ParticleInfoArray.GetNativeArray(),
                 m_ParticlePositionArray = m_ParticlePositionArray.GetNativeArray(),
-                m_ParticleTransformPositionArray = m_ParticleTransformPositionArray.GetNativeArray(),
+                // m_ParticleTransformPositionArray = m_ParticleTransformPositionArray.GetNativeArray(),
             };
             jobHandle = job.Schedule(m_ParticleInfoArray.Count, 8, jobHandle);
             return jobHandle;
         }
         
         /// <summary>
-        /// 全Particle并行,而不仅仅是ParticleTree并行
+        /// 全Particle并行,而不仅仅是ParticleTree并行,因为无需处理父子关系
         /// </summary>
         [BurstCompile]
         private struct UpdateParticles1Job : IJobParallelFor
@@ -220,13 +229,13 @@ namespace DynamicBone.Scripts
             public NativeArray<DynamicBoneTeamManager.TeamData> m_TeamDatas;
             [ReadOnly]
             public NativeArray<ParticleTreeInfo> m_ParticleTreeInfos;
-            [ReadOnly]
-            public NativeArray<float3> m_ParticleTransformPositionArray;
+            // [ReadOnly]
+            // public NativeArray<float3> m_ParticleTransformPositionArray;
             public void Execute(int index)
             {
                 var p = m_ParticleInfos[index];
                 var m_Position = m_ParticlePositionArray[index];
-                var m_TransformPosition = m_ParticleTransformPositionArray[index];
+                var m_TransformPosition = p.m_TransformPosition;
                 var teamData = m_TeamDatas[p.m_TeamIndex];
                 var paticleTreeInfo = m_ParticleTreeInfos[p.m_ParticleTreeIndex];
                 if (p.m_LocalParentIndex >= 0)
@@ -269,9 +278,9 @@ namespace DynamicBone.Scripts
                 m_TeamDatas = DynamicBoneManager.Team.m_TeamDataArray.GetNativeArray(),
                 m_ParticleInfos = m_ParticleInfoArray.GetNativeArray(),
                 m_ParticlePositionArray = m_ParticlePositionArray.GetNativeArray(),
-                m_ParticleTransformLocalPositionArray = m_ParticleTransformLocalPositionArray.GetNativeArray(),
-                m_ParticleTransformPositions = m_ParticleTransformPositionArray.GetNativeArray(),
-                m_ParticleTransformLocalToWorldMatrixArray = m_ParticleTransformLocalToWorldMatrixArray.GetNativeArray(),
+                // m_ParticleTransformLocalPositionArray = m_ParticleTransformLocalPositionArray.GetNativeArray(),
+                // m_ParticleTransformPositions = m_ParticleTransformPositionArray.GetNativeArray(),
+                // m_ParticleTransformLocalToWorldMatrixArray = m_ParticleTransformLocalToWorldMatrixArray.GetNativeArray(),
                 m_ParticleTreeInfos = m_ParticleTreeDataArray.GetNativeArray(),
             };
             //粒度为每个ParticleTree
@@ -286,9 +295,9 @@ namespace DynamicBone.Scripts
                 m_TeamDatas = DynamicBoneManager.Team.m_TeamDataArray.GetNativeArray(),
                 m_ParticleInfos = m_ParticleInfoArray.GetNativeArray(),
                 m_ParticlePositionArray = m_ParticlePositionArray.GetNativeArray(),
-                m_ParticleTransformLocalPositionArray = m_ParticleTransformLocalPositionArray.GetNativeArray(),
-                m_ParticleTransformPositions = m_ParticleTransformPositionArray.GetNativeArray(),
-                m_ParticleTransformLocalToWorldMatrixArray = m_ParticleTransformLocalToWorldMatrixArray.GetNativeArray(),
+                // m_ParticleTransformLocalPositionArray = m_ParticleTransformLocalPositionArray.GetNativeArray(),
+                // m_ParticleTransformPositions = m_ParticleTransformPositionArray.GetNativeArray(),
+                // m_ParticleTransformLocalToWorldMatrixArray = m_ParticleTransformLocalToWorldMatrixArray.GetNativeArray(),
                 m_ParticleTreeInfos = m_ParticleTreeDataArray.GetNativeArray(),
             };
             //粒度为每个ParticleTree
@@ -298,15 +307,18 @@ namespace DynamicBone.Scripts
         [BurstCompile]
         private struct SkipUpdateParticlesJob : IJobParallelFor
         {
-            //这里拆两个数组解决对同一个数据即读又写的功能,可能导致一个骨骼有多个子骨骼的时候表现异常,暂时先这么处理
-            [ReadOnly] public NativeArray<ParticleInfo> m_ParticleInfos;
-            [NativeDisableParallelForRestriction] public NativeArray<float3> m_ParticlePositionArray;
-            [ReadOnly] public NativeArray<ParticleTreeInfo> m_ParticleTreeInfos;
-            [ReadOnly] public NativeArray<float3> m_ParticleTransformLocalPositionArray;
-            [ReadOnly] public NativeArray<DynamicBoneTeamManager.TeamData> m_TeamDatas;
-            [ReadOnly] public NativeArray<float3> m_ParticleTransformPositions;
-
-            [ReadOnly] public NativeArray<Matrix4x4> m_ParticleTransformLocalToWorldMatrixArray;
+            [ReadOnly] 
+            public NativeArray<ParticleInfo> m_ParticleInfos;
+            [NativeDisableParallelForRestriction] 
+            public NativeArray<float3> m_ParticlePositionArray;
+            [ReadOnly] 
+            public NativeArray<ParticleTreeInfo> m_ParticleTreeInfos;
+            [ReadOnly] 
+            public NativeArray<DynamicBoneTeamManager.TeamData> m_TeamDatas;
+            
+            // [ReadOnly] public NativeArray<float3> m_ParticleTransformPositions;
+            // [ReadOnly] public NativeArray<float3> m_ParticleTransformLocalPositionArray;
+            // [ReadOnly] public NativeArray<Matrix4x4> m_ParticleTransformLocalToWorldMatrixArray;
 
             //粒度为每个ParticleTree
             public void Execute(int ParticleTreeIndex)
@@ -319,16 +331,16 @@ namespace DynamicBone.Scripts
                     var p = m_ParticleInfos[index];
                     var m_Position = m_ParticlePositionArray[index];
                     var teamData = m_TeamDatas[p.m_TeamIndex];
-                    var m_TransformPosition = m_ParticleTransformPositions[index];
-                    var m_TransformLocalPosition = m_ParticleTransformLocalPositionArray[index];
+                    var m_TransformPosition = p.m_TransformPosition;
+                    var m_TransformLocalPosition = p.m_TransformLocalPosition;
                     if (p.m_LocalParentIndex >= 0)
                     {
                         p.m_PrevPosition += teamData.m_ObjectMove;
                         m_Position += teamData.m_ObjectMove;
 
-                        var parentTransformPositon = m_ParticleTransformPositions[p.m_GlobalParentIndex];
+                        var parentTransformPositon = m_ParticleInfos[p.m_GlobalParentIndex].m_TransformPosition;
                         var parentPosition = m_ParticlePositionArray[p.m_GlobalParentIndex];
-                        var parentTransformLocalToWorldMatrix = m_ParticleTransformLocalToWorldMatrixArray[p.m_GlobalParentIndex];
+                        var parentTransformLocalToWorldMatrix = m_ParticleInfos[p.m_GlobalParentIndex].m_TransformLocalToWorldMatrix;
                         
                         float restLen;
                         if (p.m_TransformNotNull)
@@ -384,7 +396,7 @@ namespace DynamicBone.Scripts
         [BurstCompile]
         private struct UpdateParticles2Job : IJobParallelFor
         {
-            //这里拆两个数组解决对同一个数据即读又写的功能,可能导致一个骨骼有多个子骨骼的时候表现异常,暂时先这么处理
+            //这里[NativeDisableParallelForRestriction]解决对同一个数据即读又写的功能,可能导致一个骨骼有多个子骨骼的时候表现异常,暂时先这么处理,后续考虑ParticlePosition要不要移动到ParticleInfo中去
             [ReadOnly]
             public NativeArray<ParticleInfo> m_ParticleInfos;
             [NativeDisableParallelForRestriction]
@@ -392,13 +404,14 @@ namespace DynamicBone.Scripts
             [ReadOnly]
             public NativeArray<ParticleTreeInfo> m_ParticleTreeInfos;
             [ReadOnly]
-            public NativeArray<float3> m_ParticleTransformLocalPositionArray;
-            [ReadOnly]
             public NativeArray<DynamicBoneTeamManager.TeamData> m_TeamDatas;
-            [ReadOnly]
-            public NativeArray<float3> m_ParticleTransformPositions;
-            [ReadOnly]
-            public NativeArray<Matrix4x4> m_ParticleTransformLocalToWorldMatrixArray;
+            
+            // [ReadOnly]
+            // public NativeArray<float3> m_ParticleTransformLocalPositionArray;
+            // [ReadOnly]
+            // public NativeArray<float3> m_ParticleTransformPositions;
+            // [ReadOnly]
+            // public NativeArray<Matrix4x4> m_ParticleTransformLocalToWorldMatrixArray;
             //粒度为每个ParticleTree
             public void Execute(int ParticleTreeIndex)
             {
@@ -406,21 +419,21 @@ namespace DynamicBone.Scripts
                      index < m_ParticleTreeInfos[ParticleTreeIndex].ParticleCnt + m_ParticleTreeInfos[ParticleTreeIndex].GlobalParticleStartIndex;
                      index++)
                 {
-                    var transformPosition = m_ParticleTransformPositions[index];
-                    
                     var p = m_ParticleInfos[index];
-                    var parentTransformPosition = m_ParticleTransformPositions[p.m_GlobalParentIndex];
+                    var transformPosition = p.m_TransformPosition;
+                    var parentTransformPosition = m_ParticleInfos[p.m_GlobalParentIndex].m_TransformPosition;
                     var parentPosition = m_ParticlePositionArray[p.m_GlobalParentIndex];
                     var position = m_ParticlePositionArray[index];
                     var teamData = m_TeamDatas[p.m_TeamIndex];
                     float restLen;
+                    
                     if (p.m_TransformNotNull)
                     {
                         restLen = math.distance(parentTransformPosition, transformPosition);
                     }
                     else
                     {
-                        restLen = m_ParticleTransformLocalToWorldMatrixArray[p.m_GlobalParentIndex]
+                        restLen = m_ParticleInfos[p.m_GlobalParentIndex].m_TransformLocalToWorldMatrix
                             .MultiplyVector(p.m_EndOffset).magnitude;
                     }
 
@@ -428,12 +441,12 @@ namespace DynamicBone.Scripts
                     float stiffness = Mathf.Lerp(1.0f, p.m_Stiffness, teamData.m_Weight);
                     if (stiffness > 0 || p.m_Elasticity > 0)
                     {
-                        Matrix4x4 m0 = m_ParticleTransformLocalToWorldMatrixArray[p.m_GlobalParentIndex];
+                        Matrix4x4 m0 = m_ParticleInfos[p.m_GlobalParentIndex].m_TransformLocalToWorldMatrix;
                         m0.SetColumn(3, new Vector3(parentPosition.x, parentPosition.y, parentPosition.z));
                         float3 restPos;
                         if (p.m_TransformNotNull)
                         {
-                            restPos = m0.MultiplyPoint3x4(m_ParticleTransformLocalPositionArray[index]);
+                            restPos = m0.MultiplyPoint3x4(m_ParticleInfos[index].m_TransformLocalPosition);
                         }
                         else
                         {
@@ -547,7 +560,7 @@ namespace DynamicBone.Scripts
             {
                 m_ParticleInfoArray = m_ParticleInfoArray.GetNativeArray(),
                 m_ParticlePositionArray = m_ParticlePositionArray.GetNativeArray(),
-                m_ParticleTransformLocalToWorldMatrixArray = m_ParticleTransformLocalToWorldMatrixArray.GetNativeArray(),
+                // m_ParticleTransformLocalToWorldMatrixArray = m_ParticleTransformLocalToWorldMatrixArray.GetNativeArray(),
             };
             mainJob = job.Schedule(m_ParticleTransformAccessArray, mainJob);
             return mainJob;
@@ -561,8 +574,8 @@ namespace DynamicBone.Scripts
             public NativeArray<ParticleInfo> m_ParticleInfoArray;
             [ReadOnly]
             public NativeArray<float3> m_ParticlePositionArray;
-            [ReadOnly]
-            public NativeArray<Matrix4x4> m_ParticleTransformLocalToWorldMatrixArray;
+            // [ReadOnly]
+            // public NativeArray<Matrix4x4> m_ParticleTransformLocalToWorldMatrixArray;
             public void Execute(int index, TransformAccess transform)
             {
                 //跳过根节点
@@ -584,7 +597,7 @@ namespace DynamicBone.Scripts
                         localPos = p.m_EndOffset;
                     }
                 
-                    float3 v0 = m_ParticleTransformLocalToWorldMatrixArray[p.m_GlobalParentIndex].MultiplyVector(localPos);
+                    float3 v0 = m_ParticleInfoArray[p.m_GlobalParentIndex].m_TransformLocalToWorldMatrix.MultiplyVector(localPos);
                     float3 v1 = m_ParticlePositionArray[index] - m_ParticlePositionArray[p.m_GlobalParentIndex];
                     Quaternion rot = Quaternion.FromToRotation(v0, v1);
                     transform.rotation = rot * transform.rotation;
@@ -835,11 +848,11 @@ namespace DynamicBone.Scripts
             
             //TODO:先算出骨骼数量,统一添加n个之后再具体改里面的内容,比每次Add一个性能开销更小
             var chunk = m_ParticleInfoArray.Add(p);
-            m_ParticleTransformPositionArray.Add(m_Position);
+            // m_ParticleTransformPositionArray.Add(m_Position);
             m_ParticlePositionArray.Add(m_Position);
-            m_ParticleTransformLocalPositionArray.Add(p.m_InitLocalPosition);
-            m_ParticleTransformRotationArray.Add(b.rotation);
-            m_ParticleTransformLocalToWorldMatrixArray.Add(Matrix4x4.identity);
+            // m_ParticleTransformLocalPositionArray.Add(p.m_InitLocalPosition);
+            // m_ParticleTransformRotationArray.Add(b.rotation);
+            // m_ParticleTransformLocalToWorldMatrixArray.Add(Matrix4x4.identity);
             
             int index = chunk.m_StartIndex;
             p.m_Index = index;
@@ -946,11 +959,11 @@ namespace DynamicBone.Scripts
         public void RemoveParticles(DataChunk particleChunk)
         {
             m_ParticleInfoArray.RemoveAndFill(particleChunk);
-            m_ParticleTransformPositionArray.RemoveAndFill(particleChunk);
             m_ParticlePositionArray.RemoveAndFill(particleChunk);
-            m_ParticleTransformLocalPositionArray.RemoveAndFill(particleChunk);
-            m_ParticleTransformRotationArray.RemoveAndFill(particleChunk);
-            m_ParticleTransformLocalToWorldMatrixArray.RemoveAndFill(particleChunk);
+            // m_ParticleTransformPositionArray.RemoveAndFill(particleChunk);
+            // m_ParticleTransformLocalPositionArray.RemoveAndFill(particleChunk);
+            // m_ParticleTransformRotationArray.RemoveAndFill(particleChunk);
+            // m_ParticleTransformLocalToWorldMatrixArray.RemoveAndFill(particleChunk);
         }
     }
 }
