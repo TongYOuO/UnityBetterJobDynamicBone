@@ -707,7 +707,7 @@ namespace DynamicBone.Scripts
                     return;
                 }
                 
-                if(teamData.m_UpdateMode != DynamicBone.UpdateMode.AnimatePhysics)
+                if(teamData.m_UpdateMode != JobifyDynamicBone.UpdateMode.AnimatePhysics)
                 {
                     transform.localPosition = particleInfo.m_InitLocalPosition;
                     transform.localRotation = particleInfo.m_InitLocalRotation;

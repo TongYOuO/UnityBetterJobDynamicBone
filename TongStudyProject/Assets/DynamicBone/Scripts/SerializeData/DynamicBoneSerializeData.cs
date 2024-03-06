@@ -8,7 +8,7 @@ namespace DynamicBone.Scripts.SerializeData
     [System.Serializable]
     public class DynamicBoneSerializeData
     {
-        public DynamicBone.UpdateMode m_UpdateMode = DynamicBone.UpdateMode.AnimatePhysics;
+        public JobifyDynamicBone.UpdateMode m_UpdateMode = JobifyDynamicBone.UpdateMode.AnimatePhysics;
         
 #if UNITY_5_3_OR_NEWER
         [Tooltip("The roots of the transform hierarchy to apply physics.")]
@@ -100,7 +100,7 @@ namespace DynamicBone.Scripts.SerializeData
 #if UNITY_5_3_OR_NEWER
         [Tooltip("Constrain bones to move on specified plane.")]
 #endif	
-        public DynamicBone.FreezeAxis m_FreezeAxis = DynamicBone.FreezeAxis.None;
+        public JobifyDynamicBone.FreezeAxis m_FreezeAxis = JobifyDynamicBone.FreezeAxis.None;
 
 #if UNITY_5_3_OR_NEWER
         [Tooltip("Disable physics simulation automatically if character is far from camera or player.")]

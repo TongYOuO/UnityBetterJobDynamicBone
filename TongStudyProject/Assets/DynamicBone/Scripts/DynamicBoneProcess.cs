@@ -6,7 +6,7 @@ namespace DynamicBone.Scripts
 {
     public class DynamicBoneProcess
     {
-        public DynamicBone cloth { get; internal set; }
+        public JobifyDynamicBone cloth { get; internal set; }
 
         public int TeamId { get; private set; } = 0;
 

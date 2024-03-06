@@ -6,13 +6,13 @@ using UnityEngine;
 using UnityEngine.UIElements;
 namespace DynamicBone.Scripts.SerializeData
 {
-    [CustomEditor(typeof(DynamicBone))]
+    [CustomEditor(typeof(JobifyDynamicBone))]
     [CanEditMultipleObjects]
     public class DynamicBoneEditor:Editor
     {
         public override void OnInspectorGUI()
         {
-            var dynamicBone = target as DynamicBone;
+            var dynamicBone = target as JobifyDynamicBone;
 
             // 显示一些状态属性
             // DispVersion();
@@ -41,31 +41,31 @@ namespace DynamicBone.Scripts.SerializeData
         /// <summary>
         /// 兼容原有序列化的字段支持新功能
         /// </summary>
-        /// <param name="dynamicBone"></param>
-        private void CopyValuesToSerializeData(DynamicBone dynamicBone)
+        /// <param name="jobifyDynamicBone"></param>
+        private void CopyValuesToSerializeData(JobifyDynamicBone jobifyDynamicBone)
         {
-            if (dynamicBone.isConverted == false)
+            if (jobifyDynamicBone.isConverted == false)
             {
-                dynamicBone.isConverted = true;
+                jobifyDynamicBone.isConverted = true;
             }
             else
             {
                 return;
             }
-            System.Reflection.FieldInfo[] fields = typeof(DynamicBone).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            System.Reflection.FieldInfo[] fields = typeof(JobifyDynamicBone).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             foreach (var field in fields)
             {
                 var serializeDataField = typeof(DynamicBoneSerializeData).GetField(field.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 if (serializeDataField != null && serializeDataField.FieldType == field.FieldType)
                 {
-                    serializeDataField.SetValue(dynamicBone.SerializeData, field.GetValue(dynamicBone));
+                    serializeDataField.SetValue(jobifyDynamicBone.SerializeData, field.GetValue(jobifyDynamicBone));
                 }
             }
         }
         
         void ClothMainInspector()
         {
-            var cloth = target as DynamicBone;
+            var cloth = target as JobifyDynamicBone;
             bool runtime = EditorApplication.isPlaying;
             EditorGUILayout.LabelField("Main", EditorStyles.boldLabel);
             
@@ -89,7 +89,7 @@ namespace DynamicBone.Scripts.SerializeData
         }
         void ClothParameterInspector()
         {
-            var cloth = target as DynamicBone;
+            var cloth = target as JobifyDynamicBone;
             DynamicBonePresetUtil.DrawPresetButton(cloth, cloth.SerializeData);
             Foldout("Force外力", null, () =>
             {
@@ -124,7 +124,7 @@ namespace DynamicBone.Scripts.SerializeData
         
         void GizmoInspector()
         {
-            var cloth = target as DynamicBone;
+            var cloth = target as JobifyDynamicBone;
         }
         
         public void Foldout(

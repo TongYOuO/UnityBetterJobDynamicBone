@@ -24,7 +24,7 @@ namespace DynamicBone.Scripts
         
         void OnAfterFixedUpdate()
         {
-            if (DynamicBoneManager.m_UpdateMode == DynamicBone.UpdateMode.AnimatePhysics)
+            if (DynamicBoneManager.m_UpdateMode == JobifyDynamicBone.UpdateMode.AnimatePhysics)
             {
                 ClearMasterJob();
                 var simulationManager = DynamicBoneManager.Simulation;
@@ -35,7 +35,7 @@ namespace DynamicBone.Scripts
         
         void OnAfterUpdate()
         {
-            if (DynamicBoneManager.m_UpdateMode != DynamicBone.UpdateMode.AnimatePhysics)
+            if (DynamicBoneManager.m_UpdateMode != JobifyDynamicBone.UpdateMode.AnimatePhysics)
             {
                 ClearMasterJob();
                 var simulationManager = DynamicBoneManager.Simulation;
@@ -92,7 +92,7 @@ namespace DynamicBone.Scripts
         public void UpdateParticles()
         {
             var simulationManager = DynamicBoneManager.Simulation;
-            float t = DynamicBoneManager.m_UpdateMode == DynamicBone.UpdateMode.UnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
+            float t = DynamicBoneManager.m_UpdateMode == JobifyDynamicBone.UpdateMode.UnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
             int loop = 1;
             if (DynamicBoneManager.m_UpdateRate > 0)
             {

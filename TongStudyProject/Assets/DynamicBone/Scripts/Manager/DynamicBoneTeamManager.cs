@@ -25,11 +25,11 @@ namespace DynamicBone.Scripts
         public struct TeamData
         {
             //TODO:支持UpdateMode的修改
-            public bool IsFixedUpdate => m_UpdateMode == DynamicBone.UpdateMode.AnimatePhysics;
+            public bool IsFixedUpdate => m_UpdateMode == JobifyDynamicBone.UpdateMode.AnimatePhysics;
             
-            public bool IsUnscaled => m_UpdateMode == DynamicBone.UpdateMode.UnscaledTime;
+            public bool IsUnscaled => m_UpdateMode == JobifyDynamicBone.UpdateMode.UnscaledTime;
 
-            public DynamicBone.UpdateMode m_UpdateMode;
+            public JobifyDynamicBone.UpdateMode m_UpdateMode;
             
             public float m_ObjectScale;
             
@@ -46,7 +46,7 @@ namespace DynamicBone.Scripts
             //每个Team关联的所有的碰撞器
             public DataChunk m_ColliderInfoChunk;
             
-            public DynamicBone.FreezeAxis m_FreezeAxis;
+            public JobifyDynamicBone.FreezeAxis m_FreezeAxis;
         }
         
         public ref TeamData GetTeamDataRef(int teamId)

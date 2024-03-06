@@ -14,7 +14,7 @@ using UnityEngine.Serialization;
 namespace DynamicBone.Scripts
 {
     [AddComponentMenu("Dynamic Bone/Dynamic Bone")]
-    public class DynamicBone : MonoBehaviour
+    public class JobifyDynamicBone : MonoBehaviour
     {
         /// <summary>
         /// General processing.
@@ -93,7 +93,7 @@ namespace DynamicBone.Scripts
         
         public bool isConverted = false;
         //TODO:后续统一用工具刷一遍
-        public DynamicBone.UpdateMode m_UpdateMode = DynamicBone.UpdateMode.AnimatePhysics;
+        public JobifyDynamicBone.UpdateMode m_UpdateMode = JobifyDynamicBone.UpdateMode.AnimatePhysics;
         
 #if UNITY_5_3_OR_NEWER
         [Tooltip("The roots of the transform hierarchy to apply physics.")]
@@ -185,7 +185,7 @@ namespace DynamicBone.Scripts
 #if UNITY_5_3_OR_NEWER
         [Tooltip("Constrain bones to move on specified plane.")]
 #endif	
-        public DynamicBone.FreezeAxis m_FreezeAxis = DynamicBone.FreezeAxis.None;
+        public JobifyDynamicBone.FreezeAxis m_FreezeAxis = JobifyDynamicBone.FreezeAxis.None;
 
 #if UNITY_5_3_OR_NEWER
         [Tooltip("Disable physics simulation automatically if character is far from camera or player.")]

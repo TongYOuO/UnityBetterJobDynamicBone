@@ -24,7 +24,7 @@ namespace DynamicBone.Scripts
         
         static volatile bool isPlaying = false;
 
-        public static DynamicBone.UpdateMode m_UpdateMode = DynamicBone.UpdateMode.Normal;
+        public static JobifyDynamicBone.UpdateMode m_UpdateMode = JobifyDynamicBone.UpdateMode.Normal;
         
         public static float m_UpdateRate = 30.0f;
         

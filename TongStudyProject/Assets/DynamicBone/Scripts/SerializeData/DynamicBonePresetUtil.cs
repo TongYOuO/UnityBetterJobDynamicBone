@@ -8,10 +8,10 @@ namespace DynamicBone.Scripts.SerializeData
     public class DynamicBonePresetUtil
     {
         #if UNITY_EDITOR
-        const string prefix = "MC2_Preset";
-        const string configName = "MC2 preset folder";
+        const string prefix = "Preset";
+        const string configName = "preset folder";
 
-        public static void DrawPresetButton(DynamicBone cloth, DynamicBoneSerializeData sdata)
+        public static void DrawPresetButton(JobifyDynamicBone cloth, DynamicBoneSerializeData sdata)
         {
             bool save = false;
             bool load = false;
@@ -66,7 +66,7 @@ namespace DynamicBone.Scripts.SerializeData
             public TextAsset text;
         }
 
-        private static void CreatePresetPopupMenu(DynamicBone cloth, DynamicBoneSerializeData sdata)
+        private static void CreatePresetPopupMenu(JobifyDynamicBone cloth, DynamicBoneSerializeData sdata)
         {
             var guidArray = AssetDatabase.FindAssets($"{prefix} t:{nameof(TextAsset)}");
             if (guidArray == null)
@@ -179,7 +179,7 @@ namespace DynamicBone.Scripts.SerializeData
         /// 加载预设文件
         /// </summary>
         ///<param name="clothParam"></param>
-        private static void LoadPreset(DynamicBone cloth, DynamicBoneSerializeData sdata)
+        private static void LoadPreset(JobifyDynamicBone cloth, DynamicBoneSerializeData sdata)
         {
             // 读取文件夹
             string folder = EditorUserSettings.GetConfigValue(configName);
@@ -210,7 +210,7 @@ namespace DynamicBone.Scripts.SerializeData
         /// 预设文件加载后处理
         /// </summary>
         ///<param name="cloth"></param>
-        private static void LoadPresetFinish(DynamicBone cloth)
+        private static void LoadPresetFinish(JobifyDynamicBone cloth)
         {
             if (EditorApplication.isPlaying)
             {
